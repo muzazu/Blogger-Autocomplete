@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+</head>
+
+<body>
+    <input id="link" value="http://zaid-info.blogspot.com"></input>
+    <input id="my-text-box"></input>
+    <div id="messages"></div>
+    
+    <ul id="result"></ul>
+    <div id="js"></div>
+
+    <script type="text/javascript">
+        var input = document.querySelector('#my-text-box');
+        var text;
+        var jsdiv = document.getElementById("js");
+        
+        input.addEventListener('input', function () {
+            function read(){
+                messages.textContent = 'input changed to: ' + input.value + '\n';
+                text = input.value;
+                link = document.getElementById("link").value;
+                
+                if (jsdiv.hasChildNodes()) {
+                    for(var x = 0;x<jsdiv.children.length;x++){
+                        jsdiv.removeChild(jsdiv.childNodes[0]);
+                    }
+                }
+                document.getElementById("result").innerHTML = "Loading...";
+                //buat element script
+                var to = document.createElement('script');
+                to.src =  link+"/feeds/posts/summary?&alt=json-in-script&callback=search";
+                to.type= "text/javascript";
+                document.getElementById("js").appendChild(to);
+            }
+            window.setTimeout(read, 1000);
+            
+        });
+            
+            function search(json) {
+                var array = [];
+                var urls = [];
+                var cats = "";
+                for (var i = 0; i < json.feed.entry.length; i++) {
+                    var postTitle = json.feed.entry[i].title.$t;
+                    if(~postTitle.indexOf(text)){
+                        for (var j = 0; j < json.feed.entry[i].link.length; j++) {
+                            if (json.feed.entry[i].link[j].rel == 'alternate') {
+                                var postUrl = json.feed.entry[i].link[j].href;
+                                urls.push(postUrl);
+                                break;
+                            }
+                        }
+                        array.push(postTitle);
+                        array.sort(function (a, b) {
+                            return a.localeCompare(b);
+                        });
+                    }
+                }
+                if(array.length != 0){
+                    for (var j = 0; j < array.length; j++) {
+                        cats += "<li><a href='"+urls[j]+"' title='" + array[j] + "'>" + array[j] + "</a></li>";
+                    }
+                }
+                else{
+                    cats = "Tekan enter atau button cari untuk hasil yang lebih akurat";
+                }
+                document.getElementById("result").innerHTML = cats;
+            }
+    </script>
+</body>
+
+</HTML>
